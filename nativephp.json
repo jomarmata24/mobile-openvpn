@@ -1,0 +1,55 @@
+{
+  "name": "projectmata/mobile-openvpn",
+  "display_name": "Projectmata OpenVPN",
+  "namespace": "OpenVpn",
+  "bridge_functions": [
+    {
+      "name": "OpenVpn.IsSupported",
+      "android": "com.projectmata.mobileopenvpn.OpenVpnPlugin.IsSupported",
+      "ios": "OpenVpnPlugin.IsSupported"
+    },
+    {
+      "name": "OpenVpn.RequestPermission",
+      "android": "com.projectmata.mobileopenvpn.OpenVpnPlugin.RequestPermission",
+      "ios": "OpenVpnPlugin.RequestPermission"
+    },
+    {
+      "name": "OpenVpn.Connect",
+      "android": "com.projectmata.mobileopenvpn.OpenVpnPlugin.Connect",
+      "ios": "OpenVpnPlugin.Connect"
+    },
+    {
+      "name": "OpenVpn.Disconnect",
+      "android": "com.projectmata.mobileopenvpn.OpenVpnPlugin.Disconnect",
+      "ios": "OpenVpnPlugin.Disconnect"
+    },
+    {
+      "name": "OpenVpn.GetStatus",
+      "android": "com.projectmata.mobileopenvpn.OpenVpnPlugin.GetStatus",
+      "ios": "OpenVpnPlugin.GetStatus"
+    }
+  ],
+  "android": {
+    "min_version": 33,
+    "permissions": [
+      "android.permission.INTERNET",
+      "android.permission.ACCESS_NETWORK_STATE",
+      "android.permission.FOREGROUND_SERVICE"
+    ],
+    "dependencies": {
+      "implementation": [
+        "de.blinkt:openvpn:0.7.33"
+      ]
+    }
+  },
+  "ios": {
+    "min_version": "18.2",
+    "capabilities": [
+      "com.apple.developer.networking.vpn.api",
+      "com.apple.developer.networking.networkextension"
+    ],
+    "info_plist": {
+      "NSLocalNetworkUsageDescription": "This app uses a VPN tunnel to secure your connection."
+    }
+  }
+}
