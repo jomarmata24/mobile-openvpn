@@ -96,13 +96,13 @@ await window.NativePHP.OpenVpn.Disconnect();
 
 ### Android
 
-The manifest declares `de.blinkt:openvpn:0.7.33` as a default implementation target, but you will typically want to vendor [ics-openvpn](https://github.com/schwabe/ics-openvpn) into your project (it is not on Maven Central). Update `resources/android/src/main/java/com/projectmata/mobileopenvpn/OpenVpnPlugin.kt` `Connect.execute()` to:
+This package does not declare a default OpenVPN runtime dependency because popular Android OpenVPN implementations are not published as ordinary Maven Central artifacts. Vendor [ics-openvpn](https://github.com/schwabe/ics-openvpn) or your chosen runtime into your app, then update `resources/android/src/main/java/com/projectmata/mobileopenvpn/OpenVpnPlugin.kt` `Connect.execute()` to:
 
 1. Parse the `.ovpn` profile via `ConfigParser`.
 2. Build a `VpnProfile`.
 3. Start `OpenVPNService` with `VPNLaunchHelper.startOpenVpn(profile, context)`.
 
-Also wire the `onActivityResult` for request code `7701` so `RequestPermission` can report back once the user grants consent.
+Also wire an Activity Result callback if your runtime needs to report back once the user grants consent.
 
 ### iOS
 
