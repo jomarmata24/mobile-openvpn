@@ -11,7 +11,7 @@ import com.nativephp.mobile.bridge.BridgeError
  * OpenVPN bridge plugin.
  *
  * NOTE: This class delegates the actual tunnel work to an OpenVPN runtime
- * (e.g. ics-openvpn / de.blinkt.openvpn). Integrate the library of your
+ * (e.g. ics-openvpn or OpenVPN 3). Integrate the library of your
  * choice in the TODO sections below and wire the profile/credentials through.
  */
 class OpenVpnPlugin {
@@ -63,7 +63,7 @@ class OpenVpnPlugin {
                 }
 
                 activity.runOnUiThread {
-                    activity.startActivityForResult(intent, 7701)
+                    activity.startActivity(intent)
                 }
 
                 BridgeResponse.success(
