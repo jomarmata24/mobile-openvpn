@@ -1,18 +1,31 @@
 package com.projectmata.mobileopenvpn
 
 import android.content.Intent
+import android.content.ComponentName
+import android.content.Context
+import android.content.ServiceConnection
 import android.net.VpnService
+import android.os.IBinder
 import androidx.fragment.app.FragmentActivity
 import com.nativephp.mobile.bridge.BridgeFunction
 import com.nativephp.mobile.bridge.BridgeResponse
 import com.nativephp.mobile.bridge.BridgeError
+import de.blinkt.openvpn.VpnProfile
+import de.blinkt.openvpn.core.ConfigParser
+import de.blinkt.openvpn.core.ConnectionStatus
+import de.blinkt.openvpn.core.IOpenVPNServiceInternal
+import de.blinkt.openvpn.core.OpenVPNService
+import de.blinkt.openvpn.core.ProfileManager
+import de.blinkt.openvpn.core.VPNLaunchHelper
+import de.blinkt.openvpn.core.VpnStatus
+import java.io.StringReader
 
 /**
- * OpenVPN bridge plugin.
+ * OpenVPN bridge — backed by ics-openvpn (de.blinkt.openvpn.*).
  *
- * NOTE: This class delegates the actual tunnel work to an OpenVPN runtime
- * (e.g. ics-openvpn or OpenVPN 3). Integrate the library of your
- * choice in the TODO sections below and wire the profile/credentials through.
+ * Requires the ics-openvpn `:main` module to be on the classpath. See
+ * the host app's settings.gradle.kts and app/build.gradle.kts for the
+ * module wiring.
  */
 class OpenVpnPlugin {
 
@@ -26,18 +39,27 @@ class OpenVpnPlugin {
             return ctor.newInstance(code, message)
         }
 
-        @Volatile
-        private var lastStatus: String = "disconnected"
+        private fun stateToStatus(state: ConnectionStatus?): String = when (state) {
+            ConnectionStatus.LEVEL_CONNECTED            -> "connected"
+            ConnectionStatus.LEVEL_CONNECTING_NO_SERVER_REPLY_YET,
+            ConnectionStatus.LEVEL_CONNECTING_SERVER_REPLIED,
+            ConnectionStatus.LEVEL_WAITING_FOR_USER_INPUT,
+            ConnectionStatus.LEVEL_START                -> "connecting"
+            ConnectionStatus.LEVEL_AUTH_FAILED          -> "auth_failed"
+            else                                        -> "disconnected"
+        }
     }
 
     class IsSupported(private val activity: FragmentActivity) : BridgeFunction {
         override fun execute(parameters: Map<String, Any>): Map<String, Any> {
             return try {
-                val supported = VpnService.prepare(activity) != null || true
+                // Android always supports VpnService — the prepare() return value
+                // tells us whether permission has been granted yet, not whether
+                // VPN is supported on this device.
                 BridgeResponse.success(
                     mapOf<String, Any>(
                         "success" to true,
-                        "supported" to supported
+                        "supported" to true
                     )
                 )
             } catch (e: Exception) {
@@ -84,25 +106,47 @@ class OpenVpnPlugin {
     class Connect(private val activity: FragmentActivity) : BridgeFunction {
         override fun execute(parameters: Map<String, Any>): Map<String, Any> {
             return try {
-                val profile = parameters["profile"]?.toString() ?: ""
-                val username = parameters["username"]?.toString()
-                val password = parameters["password"]?.toString()
+                val profileText = parameters["profile"]?.toString() ?: ""
+                val username    = parameters["username"]?.toString()
+                val password    = parameters["password"]?.toString()
                 val displayName = parameters["displayName"]?.toString() ?: "Projectmata VPN"
 
-                if (profile.isBlank()) {
+                if (profileText.isBlank()) {
                     return BridgeResponse.error(
                         makeError("OPENVPN_BAD_PROFILE", "OpenVPN profile (.ovpn content) is required.")
                     )
                 }
 
-                // TODO: hand `profile`, `username`, `password` to your OpenVPN
-                // runtime (e.g. OpenVPNService from ics-openvpn) and start the tunnel.
-                lastStatus = "connecting"
+                // Permission must already be granted (call RequestPermission first).
+                if (VpnService.prepare(activity) != null) {
+                    return BridgeResponse.error(
+                        makeError(
+                            "OPENVPN_PERMISSION_REQUIRED",
+                            "VPN permission has not been granted. Call RequestPermission first."
+                        )
+                    )
+                }
+
+                // Parse the .ovpn into an ics-openvpn VpnProfile.
+                val parser = ConfigParser()
+                parser.parseConfig(StringReader(profileText))
+                val profile: VpnProfile = parser.convertProfile()
+                profile.mName = displayName
+
+                if (!username.isNullOrEmpty()) {
+                    profile.mUsername = username
+                    profile.mPassword = password ?: ""
+                }
+
+                // Persist + start.
+                ProfileManager.getInstance(activity).addProfile(profile)
+                ProfileManager.getInstance(activity).saveProfile(activity, profile)
+                VPNLaunchHelper.startOpenVpn(profile, activity)
 
                 BridgeResponse.success(
                     mapOf<String, Any>(
                         "success" to true,
-                        "status" to lastStatus,
+                        "status" to stateToStatus(VpnStatus.getLastLevel()),
                         "displayName" to displayName
                     )
                 )
@@ -117,13 +161,30 @@ class OpenVpnPlugin {
     class Disconnect(private val activity: FragmentActivity) : BridgeFunction {
         override fun execute(parameters: Map<String, Any>): Map<String, Any> {
             return try {
-                // TODO: stop the OpenVPN service / tunnel.
-                lastStatus = "disconnected"
+                val intent = Intent(activity, OpenVPNService::class.java).apply {
+                    action = OpenVPNService.START_SERVICE
+                }
+
+                val connection = object : ServiceConnection {
+                    override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
+                        try {
+                            val service = IOpenVPNServiceInternal.Stub.asInterface(binder)
+                            service?.stopVPN(false)
+                        } catch (_: Exception) {
+                            // best-effort — fall through to ProfileManager
+                        }
+                        try { activity.unbindService(this) } catch (_: Exception) {}
+                    }
+                    override fun onServiceDisconnected(name: ComponentName?) {}
+                }
+
+                activity.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+                ProfileManager.setConntectedVpnProfileDisconnected(activity)
 
                 BridgeResponse.success(
                     mapOf<String, Any>(
                         "success" to true,
-                        "status" to lastStatus
+                        "status" to "disconnected"
                     )
                 )
             } catch (e: Exception) {
@@ -139,7 +200,7 @@ class OpenVpnPlugin {
             return BridgeResponse.success(
                 mapOf<String, Any>(
                     "success" to true,
-                    "status" to lastStatus
+                    "status" to stateToStatus(VpnStatus.getLastLevel())
                 )
             )
         }
