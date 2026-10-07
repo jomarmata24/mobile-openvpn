@@ -1,0 +1,22 @@
+{
+  "upstream": "https://github.com/schwabe/ics-openvpn",
+  "commit": "06cae71ed3a49a9ff353b1efabd6f13b509aa04a",
+  "submodules": "03ae834edbace31a96157b89bf50e5ee464e5ef9 main/src/main/cpp/asio (asio-1-32-0)\n 47a18b2fe98557590f35055a93d1932f7466d4db main/src/main/cpp/fmt (12.0.0-20-g47a18b2fe)\n 5ff839680134437dbf4678f3d0c7b371d84f4964 main/src/main/cpp/lz4 (v1.9.4)\n b1c8e41ae3b36a9a88e0cbee10ed38a577b54726 main/src/main/cpp/mbedtls (mbedtls-2.22.0-81-gb1c8e41ae3)\n 410c4e1050e65ac70e6a5067d74b833b4bea3702 main/src/main/cpp/openssl (android-wear-5.0.0_r1-87-g410c4e105)\n 37ef162cbf5daaa676b0daede81a9f975791a926 main/src/main/cpp/openvpn (v2.7_rc6-1-g37ef162cb)\n 300b1460a8365cd4c3d2fb705245b669e2ac27f2 main/src/main/cpp/openvpn3 (2.62.0rc1-2-g300b1460a)",
+  "local_patch_files": [
+    "main/build.gradle.kts",
+    "main/src/main/cpp/CMakeLists.txt",
+    "main/src/main/java/de/blinkt/openvpn/VpnProfile.java",
+    "main/src/main/java/de/blinkt/openvpn/core/OpenVPNService.java",
+    "main/src/main/java/de/blinkt/openvpn/core/OpenVPNThread.java",
+    "main/src/main/java/de/blinkt/openvpn/core/VPNLaunchHelper.java"
+  ],
+  "manifest": "Embedded services only; standalone UI/exported API removed.",
+  "aar_sha256": "57226485b4ba4902b49d64cea22b2af917b3331971367b7c1df9747262051d02",
+  "sources_sha256": "a402a85e8d2cc4e8309db68494444e8d3a5ebf04711d8b36b297e62055a0d855",
+  "abis": [
+    "arm64-v8a",
+    "armeabi-v7a",
+    "x86",
+    "x86_64"
+  ]
+}

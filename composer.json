@@ -2,7 +2,7 @@
   "name": "projectmata/mobile-openvpn",
   "description": "OpenVPN client plugin for NativePHP Mobile",
   "type": "nativephp-plugin",
-  "license": "MIT",
+  "license": ["MIT", "GPL-2.0-only"],
   "autoload": {
     "psr-4": {
       "Projectmata\\MobileOpenVpn\\": "src/"
@@ -19,6 +19,7 @@
     }
   },
   "require": {
-    "php": "^8.1"
+    "php": "^8.1",
+    "nativephp/mobile": "^3.2 || ^4.0"
   }
 }

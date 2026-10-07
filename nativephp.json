@@ -2,6 +2,9 @@
   "name": "projectmata/mobile-openvpn",
   "display_name": "Projectmata OpenVPN",
   "namespace": "OpenVpn",
+  "hooks": {
+    "post_compile": "nativephp:mobile-openvpn:prepare-android"
+  },
   "bridge_functions": [
     {
       "name": "OpenVpn.IsSupported",
@@ -27,6 +30,11 @@
       "name": "OpenVpn.GetStatus",
       "android": "com.projectmata.mobileopenvpn.OpenVpnPlugin.GetStatus",
       "ios": "OpenVpnPlugin.GetStatus"
+    },
+    {
+      "name": "OpenVpn.GetEvents",
+      "android": "com.projectmata.mobileopenvpn.OpenVpnPlugin.GetEvents",
+      "ios": "OpenVpnPlugin.GetEvents"
     }
   ],
   "android": {
@@ -38,13 +46,6 @@
     ]
   },
   "ios": {
-    "min_version": "18.2",
-    "capabilities": [
-      "com.apple.developer.networking.vpn.api",
-      "com.apple.developer.networking.networkextension"
-    ],
-    "info_plist": {
-      "NSLocalNetworkUsageDescription": "This app uses a VPN tunnel to secure your connection."
-    }
+    "min_version": "18.2"
   }
 }

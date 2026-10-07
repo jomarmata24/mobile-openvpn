@@ -58,4 +58,12 @@ class OpenVpnManager
     {
         return $this->callNative('OpenVpn.GetStatus');
     }
+
+    public function getEvents(int $sinceTs = 0, int $limit = 100): mixed
+    {
+        return $this->callNative('OpenVpn.GetEvents', [
+            'sinceTs' => max(0, $sinceTs),
+            'limit' => max(1, min(200, $limit)),
+        ]);
+    }
 }
