@@ -24,6 +24,7 @@ manifest = '''<?xml version="1.0" encoding="utf-8"?>
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
   <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
   <application android:name="de.blinkt.openvpn.core.ICSOpenVPNApplication">
     <service android:name="de.blinkt.openvpn.core.OpenVPNService" android:exported="true"
       android:permission="android.permission.BIND_VPN_SERVICE" android:foregroundServiceType="specialUse" android:process=":openvpn">
@@ -31,6 +32,8 @@ manifest = '''<?xml version="1.0" encoding="utf-8"?>
       <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="vpn" />
     </service>
     <service android:name="de.blinkt.openvpn.core.OpenVPNStatusService" android:exported="false" android:process=":openvpn" />
+    <service android:name="de.blinkt.openvpn.core.keepVPNAlive" android:exported="true"
+      android:permission="android.permission.BIND_JOB_SERVICE" android:process=":openvpn" />
   </application>
 </manifest>
 '''

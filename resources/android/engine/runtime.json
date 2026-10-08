@@ -11,8 +11,8 @@
     "main/src/main/java/de/blinkt/openvpn/core/VPNLaunchHelper.java"
   ],
   "manifest": "Embedded services only; standalone UI/exported API removed.",
-  "aar_sha256": "57226485b4ba4902b49d64cea22b2af917b3331971367b7c1df9747262051d02",
-  "sources_sha256": "a402a85e8d2cc4e8309db68494444e8d3a5ebf04711d8b36b297e62055a0d855",
+  "aar_sha256": "1218ececf427b25909730afc5cc8a748b388d821fd549853ade2d570010f687b",
+  "sources_sha256": "9bd00c7a41ecafe8cc7d8f96ce042b486f629d15f960f936fe58f89626908cc3",
   "abis": [
     "arm64-v8a",
     "armeabi-v7a",
